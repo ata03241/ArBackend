@@ -145,3 +145,7 @@ C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\obj\Debug\net10.0\refint\ArM
 C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\obj\Debug\net10.0\ArMenuApi.pdb
 C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\obj\Debug\net10.0\ArMenuApi.genruntimeconfig.cache
 C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\obj\Debug\net10.0\ref\ArMenuApi.dll
+C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\obj\Debug\net10.0\ArMenuApi.sourcelink.json
+C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
