@@ -149,3 +149,4 @@ C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\obj\Debug\net10.0\ArMenuApi.
 C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\pakhr\OneDrive\Desktop\ArBackend\ArMenuApi\bin\Debug\net10.0\ArMenuApi.staticwebassets.runtime.json

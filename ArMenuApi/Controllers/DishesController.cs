@@ -1,51 +1,101 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ArMenuApi.Data;
+using ArMenuApi.Models;
 
 namespace ArMenuApi.Controllers;
 
 [ApiController]
-[Route("api/uploads")]
-public class UploadsController : ControllerBase
+[Route("api")]
+public class DishesController : ControllerBase
 {
-    private readonly IWebHostEnvironment _env;
+    private readonly ArMenuDbContext _db;
 
-    public UploadsController(IWebHostEnvironment env)
+    public DishesController(ArMenuDbContext db)
     {
-        _env = env;
+        _db = db;
     }
 
-    [HttpPost("video")]
-    public async Task<ActionResult<object>> UploadVideo(IFormFile file)
-        => await SaveFile(file, "videos", new[] { ".mp4", ".mov", ".webm" });
-
-    [HttpPost("image")]
-    public async Task<ActionResult<object>> UploadImage(IFormFile file)
-        => await SaveFile(file, "images", new[] { ".jpg", ".jpeg", ".png", ".webp" });
-
-    [HttpPost("target-file")]
-    public async Task<ActionResult<object>> UploadTargetFile(IFormFile file)
-        => await SaveFile(file, "targets", new[] { ".mind" });
-
-    private async Task<ActionResult<object>> SaveFile(IFormFile file, string subfolder, string[] allowedExtensions)
+    // GET /api/restaurants/5/dishes  — full data, for the dashboard
+    [HttpGet("restaurants/{restaurantId}/dishes")]
+    public async Task<ActionResult<List<Dish>>> GetByRestaurant(int restaurantId)
     {
-        if (file is null || file.Length == 0)
-            return BadRequest("No file received.");
+        return await _db.Dishes
+            .Where(d => d.RestaurantId == restaurantId)
+            .OrderBy(d => d.TargetIndex)
+            .ToListAsync();
+    }
 
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(extension))
-            return BadRequest($"File type {extension} not allowed. Allowed: {string.Join(", ", allowedExtensions)}");
+    // GET /api/restaurants/5/dishes/public  — trimmed data, for the AR frontend
+    [HttpGet("restaurants/{restaurantId}/dishes/public")]
+    public async Task<ActionResult<List<DishPublicDto>>> GetPublicByRestaurant(int restaurantId)
+    {
+        var dishes = await _db.Dishes
+            .Where(d => d.RestaurantId == restaurantId && d.IsActive)
+            .OrderBy(d => d.TargetIndex)
+            .Select(d => new DishPublicDto
+            {
+                TargetIndex = d.TargetIndex,
+                Name = d.Name,
+                Ingredients = d.Ingredients,
+                Allergens = d.Allergens,
+                VideoSrc = d.VideoUrl ?? string.Empty
+            })
+            .ToListAsync();
 
-        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", subfolder);
-        Directory.CreateDirectory(uploadsFolder);
+        return dishes;
+    }
 
-        var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+    // GET /api/dishes/12
+    [HttpGet("dishes/{id}")]
+    public async Task<ActionResult<Dish>> GetOne(int id)
+    {
+        var dish = await _db.Dishes.FindAsync(id);
+        if (dish is null) return NotFound();
+        return dish;
+    }
 
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
+    // POST /api/restaurants/5/dishes
+    [HttpPost("restaurants/{restaurantId}/dishes")]
+    public async Task<ActionResult<Dish>> Create(int restaurantId, Dish dish)
+    {
+        var restaurantExists = await _db.Restaurants.AnyAsync(r => r.Id == restaurantId);
+        if (!restaurantExists) return NotFound($"Restaurant {restaurantId} not found.");
 
-        var publicUrl = $"/uploads/{subfolder}/{uniqueFileName}";
-        return Ok(new { url = publicUrl });
+        dish.RestaurantId = restaurantId;
+        _db.Dishes.Add(dish);
+        await _db.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetOne), new { id = dish.Id }, dish);
+    }
+
+    // PUT /api/dishes/12
+    [HttpPut("dishes/{id}")]
+    public async Task<IActionResult> Update(int id, Dish updated)
+    {
+        var dish = await _db.Dishes.FindAsync(id);
+        if (dish is null) return NotFound();
+
+        dish.TargetIndex = updated.TargetIndex;
+        dish.Name = updated.Name;
+        dish.Ingredients = updated.Ingredients;
+        dish.Allergens = updated.Allergens;
+        dish.MenuImageUrl = updated.MenuImageUrl;
+        dish.VideoUrl = updated.VideoUrl;
+        dish.IsActive = updated.IsActive;
+
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // DELETE /api/dishes/12
+    [HttpDelete("dishes/{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var dish = await _db.Dishes.FindAsync(id);
+        if (dish is null) return NotFound();
+
+        _db.Dishes.Remove(dish);
+        await _db.SaveChangesAsync();
+        return NoContent();
     }
 }
