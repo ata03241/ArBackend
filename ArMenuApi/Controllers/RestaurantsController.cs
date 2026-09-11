@@ -34,8 +34,14 @@ public class RestaurantsController : ControllerBase
 
     // POST /api/restaurants
     [HttpPost]
-    public async Task<ActionResult<Restaurant>> Create(Restaurant restaurant)
+    public async Task<ActionResult<Restaurant>> Create(CreateRestaurantDto dto)
     {
+        var restaurant = new Restaurant
+        {
+            Name = dto.Name,
+            ContactEmail = dto.ContactEmail
+        };
+
         _db.Restaurants.Add(restaurant);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(GetOne), new { id = restaurant.Id }, restaurant);
